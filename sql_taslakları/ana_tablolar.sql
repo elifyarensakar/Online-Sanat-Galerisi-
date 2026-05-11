@@ -8,6 +8,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ); 
 -- SANAT ESERLERİ 
+-- Eğer tabloyu yeniden oluşturacaksan bu halini kullan:
 CREATE TABLE IF NOT EXISTS artworks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     artist_id INT NOT NULL,
@@ -16,10 +17,9 @@ CREATE TABLE IF NOT EXISTS artworks (
     price DECIMAL(10, 2) NOT NULL,
     image_url VARCHAR(255),
     stock_status BOOLEAN DEFAULT TRUE,
+    category VARCHAR(50), -- Kategori bilgisi eklendi
+    view_count INT DEFAULT 0, -- İstatistik için izlenme sayısı eklendi
     FOREIGN KEY (artist_id) REFERENCES users(id) ON DELETE CASCADE
-    ALTER TABLE artworks 
-    ADD COLUMN category VARCHAR(50), -- Karşılaştırma için kategori 
-    ADD COLUMN view_count INT DEFAULT 0; -- İstatistik için gerekli
 );
 
 -- ETKİNLİKLER 
@@ -29,9 +29,8 @@ CREATE TABLE IF NOT EXISTS events (
     event_date DATE NOT NULL,
     event_time TIME NOT NULL,
     capacity INT NOT NULL,
-    price DECIMAL(10, 2) NOT NULL
-    ALTER TABLE events 
-    ADD COLUMN current_participants INT DEFAULT 0;
+    price DECIMAL(10, 2) NOT NULL,
+    current_participants INT DEFAULT 0 -- Mevcut katılımcı sayısı eklendi
 );
 -- REZERVASYONLAR 
 CREATE TABLE IF NOT EXISTS reservations (
