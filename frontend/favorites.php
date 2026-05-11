@@ -1,3 +1,4 @@
+<?php include 'baglanti.php'; ?>
 <!DOCTYPE html>
 <html lang="tr">
 <head>
