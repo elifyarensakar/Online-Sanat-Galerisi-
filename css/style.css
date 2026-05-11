@@ -22,7 +22,7 @@ th {
 }
 
 button {
-    background-color: #5cb85c;
+    background-color: hsl(120, 39%, 54%);
     color: white;
     padding: 10px;
     border: none;
