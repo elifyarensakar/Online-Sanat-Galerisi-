@@ -199,3 +199,88 @@ h1, h2 {
         grid-template-columns: 1fr;
     }
 }
+/* Etkinlikler Sayfası Özel Tasarımı */
+.page-header {
+    text-align: center;
+    margin-bottom: 50px;
+    color: white;
+}
+
+.events-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    padding: 20px 0;
+}
+
+.event-card {
+    background: #1e1e1e;
+    border-radius: 15px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #333;
+    transition: transform 0.3s ease;
+}
+
+.event-card:hover {
+    transform: translateY(-5px);
+}
+
+.event-date-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #e67e22;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    min-width: 50px;
+}
+
+.event-date-badge .day { font-size: 1.5rem; font-weight: bold; }
+.event-date-badge .month { font-size: 0.8rem; text-transform: uppercase; }
+
+.event-content {
+    padding: 25px;
+    padding-top: 40px;
+}
+
+.event-content h3 { color: #e67e22; margin-bottom: 15px; }
+.event-desc { color: #ccc; font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px; }
+
+.event-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid #333;
+    padding-top: 15px;
+    color: #888;
+    font-size: 0.85rem;
+}
+
+.btn-reserve {
+    background: transparent;
+    border: 1px solid #e67e22;
+    color: #e67e22;
+    padding: 8px 15px;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: 0.3s;
+}
+
+.btn-reserve:hover {
+    background: #e67e22;
+    color: white;
+}
+
+.no-data {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 100px;
+    color: #555;
+}
+
+.no-data i { font-size: 4rem; margin-bottom: 20px; }
