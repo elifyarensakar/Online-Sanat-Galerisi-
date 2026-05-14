@@ -9,15 +9,15 @@ if (!isset($_GET['id'])) {
 
 $id = mysqli_real_escape_string($baglan, $_GET['id']);
 
-// 1. Görüntülenme sayısını artır
-mysqli_query($baglan, "UPDATE artworks SET view_count = view_count + 1 WHERE id = $id");
+// 1. Görüntülenme sayısını artır (Ödev İstatistik Maddesi 16 için)
+mysqli_query($baglan, "UPDATE artworks SET view_count = view_count + 1 WHERE id = '$id'");
 
-// 2. Eser bilgilerini çek
+// 2. Eser ve Sanatçı Bilgilerini Çek (Gereksinim 1)
 $query = mysqli_query($baglan, "
     SELECT artworks.*, users.full_name as artist_name 
     FROM artworks 
     JOIN users ON artworks.artist_id = users.id 
-    WHERE artworks.id = $id
+    WHERE artworks.id = '$id'
 ");
 $artwork = mysqli_fetch_assoc($query);
 
@@ -31,7 +31,7 @@ if (!$artwork) {
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title><?php echo htmlspecialchars($artwork['title'] ?? 'Eser Detayı'); ?> - KTÜ Sanat Galerisi</title>
+    <title><?php echo htmlspecialchars($artwork['title'] ?? 'Eser Detayı'); ?> - KTÜ Galeri</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body class="dark-mode">
@@ -94,6 +94,31 @@ if (!$artwork) {
                     <?php endif; ?>
                 </div>
 
+                <div class="comment-form-container" style="margin-bottom: 30px;">
+                    <?php if(isset($_SESSION['user_id'])): ?>
+                        <h4 style="color: #f1c40f; margin-bottom: 15px;">✍️ Eser Hakkında Yorum Yap</h4>
+                        <form action="yorum_ekle.php" method="POST" style="background: #1e1e1e; padding: 20px; border-radius: 12px; border: 1px solid #333;">
+                            <input type="hidden" name="artwork_id" value="<?php echo $id; ?>">
+                            <div style="margin-bottom: 15px;">
+                                <label style="color: #ccc; display:block; margin-bottom:5px;">Puanınız:</label>
+                                <select name="rating" required style="padding: 8px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 5px;">
+                                    <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+                                    <option value="4">⭐⭐⭐⭐ (4)</option>
+                                    <option value="3">⭐⭐⭐ (3)</option>
+                                    <option value="2">⭐⭐ (2)</option>
+                                    <option value="1">⭐ (1)</option>
+                                </select>
+                            </div>
+                            <textarea name="comment_text" required placeholder="Düşüncelerinizi paylaşın..." style="width: 100%; height: 80px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; margin-bottom: 10px; box-sizing: border-box;"></textarea>
+                            <button type="submit" style="background: #f1c40f; color: black; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; cursor: pointer;">Gönder</button>
+                        </form>
+                    <?php else: ?>
+                        <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; border: 1px solid #e74c3c; color: #e74c3c;">
+                            ⚠️ Yorum yapabilmek için <a href="login.php" style="color: #f1c40f; font-weight: bold;">giriş yapmalısınız</a>.
+                        </div>
+                    <?php endif; ?>
+                </div>
+
                 <div class="comments-section" style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #333;">
                     <h3 style="color: #f1c40f; margin-bottom: 15px;">💬 Kullanıcı Yorumları</h3>
                     <?php
@@ -104,13 +129,12 @@ if (!$artwork) {
                         WHERE item_id = '$id' AND item_type = 'artwork'
                         ORDER BY created_at DESC
                     ");
-
                     if (mysqli_num_rows($sorgu_yorumlar) > 0):
                         while ($yorum = mysqli_fetch_assoc($sorgu_yorumlar)): ?>
                             <div style="background: #1a1a1a; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #222;">
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <strong style="color: #fff;"><?php echo htmlspecialchars($yorum['full_name']); ?></strong>
-                                    <span style="color: #f1c40f;"><?php echo str_repeat('★', $yorum['rating']); ?></span>
+                                    <span style="color: #f1c40f;"><?php echo str_repeat('★', (int)$yorum['rating']); ?></span>
                                 </div>
                                 <p style="color: #999; font-size: 0.9rem; margin-top: 8px;"><?php echo htmlspecialchars($yorum['comment_text']); ?></p>
                             </div>
