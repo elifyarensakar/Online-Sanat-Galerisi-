@@ -11,8 +11,20 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// 1. Kullanıcı Bilgilerini Çek
-$sorgu_user = mysqli_query($baglan, "SELECT full_name, email FROM users WHERE id = '$user_id'");
+// --- PROFİL GÜNCELLEME İŞLEMİ (Gereksinim 7) ---
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['update_profile'])) {
+    $new_name = mysqli_real_escape_string($baglan, $_POST['full_name']);
+    $new_phone = mysqli_real_escape_string($baglan, $_POST['phone']);
+
+    $update_sql = "UPDATE users SET full_name = '$new_name', phone = '$new_phone' WHERE id = '$user_id'";
+    if (mysqli_query($baglan, $update_sql)) {
+        $_SESSION['full_name'] = $new_name; // Navbardaki ismi güncelle
+        echo "<script>alert('Profil başarıyla güncellendi!');</script>";
+    }
+}
+
+// 1. Kullanıcı Bilgilerini Çek (Phone dahil)
+$sorgu_user = mysqli_query($baglan, "SELECT full_name, email, phone FROM users WHERE id = '$user_id'");
 $user = mysqli_fetch_assoc($sorgu_user);
 
 // 2. Katılınan Etkinlikleri Çek
@@ -58,10 +70,24 @@ $sorgu_destek = mysqli_query($baglan, "SELECT * FROM support_tickets WHERE user_
 
     <main class="container" style="max-width: 900px; margin: 50px auto; padding: 0 20px;">
         
-        <div class="profile-header" style="text-align: center; margin-bottom: 40px; background: #1e1e1e; padding: 30px; border-radius: 15px; border: 1px solid #333;">
-            <div class="profile-avatar" style="font-size: 50px; margin-bottom: 15px;">👤</div>
-            <h2 style="color: #f1c40f; margin: 0;"><?php echo htmlspecialchars($user['full_name'] ?? 'Kullanıcı'); ?></h2>
-            <p style="color: #888; margin: 5px 0 0 0;"><?php echo htmlspecialchars($user['email'] ?? ''); ?></p>
+        <div class="profile-header" style="margin-bottom: 40px; background: #1e1e1e; padding: 30px; border-radius: 15px; border: 1px solid #333;">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <div class="profile-avatar" style="font-size: 50px; margin-bottom: 10px;">👤</div>
+                <h2 style="color: #f1c40f; margin: 0;"><?php echo htmlspecialchars($user['full_name']); ?></h2>
+                <p style="color: #888;"><?php echo htmlspecialchars($user['email']); ?></p>
+            </div>
+            
+            <form method="POST" style="max-width: 400px; margin: 0 auto; border-top: 1px solid #333; padding-top: 20px;">
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ccc; font-size: 0.85rem;">Ad Soyad:</label>
+                    <input type="text" name="full_name" value="<?php echo htmlspecialchars($user['full_name']); ?>" required style="width: 100%; padding: 10px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 8px;">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="color: #ccc; font-size: 0.85rem;">Telefon:</label>
+                    <input type="text" name="phone" value="<?php echo htmlspecialchars($user['phone'] ?? ''); ?>" placeholder="05XX XXX XX XX" style="width: 100%; padding: 10px; background: #2c2c2c; border: 1px solid #444; color: white; border-radius: 8px;">
+                </div>
+                <button type="submit" name="update_profile" style="width: 100%; background: #f1c40f; color: black; border: none; padding: 10px; border-radius: 20px; font-weight: bold; cursor: pointer;">Bilgileri Güncelle</button>
+            </form>
         </div>
 
         <div style="display: grid; gap: 40px;">
@@ -74,9 +100,9 @@ $sorgu_destek = mysqli_query($baglan, "SELECT * FROM support_tickets WHERE user_
                     if (mysqli_num_rows($sorgu_kuponlar) > 0):
                         while($kupon = mysqli_fetch_assoc($sorgu_kuponlar)): ?>
                             <div style="background: linear-gradient(135deg, #2c3e50, #000); padding: 20px; border-radius: 12px; border: 1px dashed #f1c40f; text-align: center;">
-                                <div style="font-size: 0.7rem; color: #aaa; text-transform: uppercase;">İndirim: %<?php echo (int)$kupon['discount_rate']; ?></div>
+                                <div style="font-size: 0.7rem; color: #aaa;">İndirim: %<?php echo (int)$kupon['discount_rate']; ?></div>
                                 <div style="font-size: 1.2rem; color: #f1c40f; font-weight: bold; margin: 10px 0;"><?php echo htmlspecialchars($kupon['code']); ?></div>
-                                <div style="font-size: 0.65rem; color: #888;">Geçerlilik: <?php echo date("d.m.Y", strtotime($kupon['expiry_date'])); ?></div>
+                                <div style="font-size: 0.65rem; color: #888;">Son: <?php echo date("d.m.Y", strtotime($kupon['expiry_date'])); ?></div>
                             </div>
                         <?php endwhile;
                     else: ?>
@@ -93,20 +119,20 @@ $sorgu_destek = mysqli_query($baglan, "SELECT * FROM support_tickets WHERE user_
                             <div style="background: #1e1e1e; padding: 15px; border-radius: 12px; border-left: 5px solid #27ae60; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                                 <div>
                                     <h4 style="color: #fff; margin: 0;"><?php echo htmlspecialchars($e['title']); ?></h4>
-                                    <small style="color: #bbb;">📍 <?php echo htmlspecialchars($e['location'] ?? 'KTÜ Galeri Salonu'); ?> | 🗓️ <?php echo date("d.m.Y", strtotime($e['event_date'])); ?></small>
+                                    <small style="color: #bbb;">🗓️ <?php echo date("d.m.Y", strtotime($e['event_date'])); ?></small>
                                 </div>
-                                <span style="background: rgba(39, 174, 96, 0.1); color: #2ecc71; padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: bold;">Onaylandı</span>
+                                <span style="color: #2ecc71; font-size: 0.8rem; font-weight: bold;">ONAYLANDI</span>
                             </div>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <p style="color: #666; font-style: italic;">Henüz bir etkinliğe kayıt olmadınız.</p>
+                        <p style="color: #666; font-style: italic;">Kayıtlı etkinlik yok.</p>
                     <?php endif; ?>
                 </div>
             </section>
 
             <section>
                 <h3 style="color: #fff; border-bottom: 2px solid #e67e22; padding-bottom: 10px; margin-bottom: 20px;">🖼️ Sahip Olduğum Eserler</h3>
-                <div class="my-artworks" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
                     <?php if (mysqli_num_rows($sorgu_eserler) > 0): ?>
                         <?php while($art = mysqli_fetch_assoc($sorgu_eserler)): ?>
                             <div style="background: #1e1e1e; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
@@ -118,51 +144,39 @@ $sorgu_destek = mysqli_query($baglan, "SELECT * FROM support_tickets WHERE user_
                             </div>
                         <?php endwhile; ?>
                     <?php else: ?>
-                        <p style="color: #666; font-style: italic;">Henüz bir eser satın almadınız.</p>
+                        <p style="color: #666; font-style: italic;">Henüz eser almadınız.</p>
                     <?php endif; ?>
                 </div>
             </section>
 
             <section>
-                <h3 style="color: #fff; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">✉️ Geçmiş Destek Taleplerim</h3>
-                <div class="my-support">
+                <h3 style="color: #fff; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">✉️ Destek ve Mesajlarım</h3>
+                <div style="margin-bottom: 20px;">
                     <?php if (mysqli_num_rows($sorgu_destek) > 0): ?>
                         <?php while($ticket = mysqli_fetch_assoc($sorgu_destek)): ?>
                             <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; margin-bottom: 10px; border: 1px solid #333;">
                                 <div style="display: flex; justify-content: space-between;">
                                     <strong style="color: #fff;"><?php echo htmlspecialchars($ticket['subject']); ?></strong>
-                                    <span style="color: <?php echo ($ticket['status'] == 'open') ? '#27ae60' : '#888'; ?>; font-size: 0.8rem; font-weight: bold;">
-                                        <?php echo strtoupper($ticket['status']); ?>
-                                    </span>
+                                    <span style="color: <?php echo ($ticket['status'] == 'open') ? '#27ae60' : '#888'; ?>; font-size: 0.75rem; font-weight: bold;"><?php echo strtoupper($ticket['status']); ?></span>
                                 </div>
-                                <p style="color: #888; font-size: 0.9rem; margin-top: 5px;"><?php echo htmlspecialchars($ticket['message']); ?></p>
+                                <p style="color: #888; font-size: 0.85rem; margin-top: 5px;"><?php echo htmlspecialchars($ticket['message']); ?></p>
                             </div>
                         <?php endwhile; ?>
-                    <?php else: ?>
-                        <p style="color: #666; font-style: italic;">Açık bir destek talebiniz bulunmuyor.</p>
                     <?php endif; ?>
                 </div>
-            </section>
 
-            <section style="background: #1e1e1e; padding: 25px; border-radius: 15px; border: 1px solid #333;">
-                <h3 style="color: #3498db; margin-bottom: 20px;">🆕 Yeni Destek Talebi Oluştur</h3>
-                <form action="destek_islem.php" method="POST">
-                    <div style="margin-bottom: 15px;">
-                        <label style="color: #ccc; display: block; margin-bottom: 5px;">Konu Seçin:</label>
-                        <select name="subject" required style="width: 100%; padding: 10px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 8px;">
+                <div style="background: #1e1e1e; padding: 20px; border-radius: 15px; border: 1px solid #333;">
+                    <form action="destek_islem.php" method="POST">
+                        <select name="subject" required style="width: 100%; padding: 10px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 8px; margin-bottom: 10px;">
                             <option value="Ödeme Sorunu">💳 Ödeme Sorunu</option>
-                            <option value="Bilet İşlemleri">🎟️ Bilet / Etkinlik İşlemleri</option>
-                            <option value="Sanatçı Başvurusu">🎨 Sanatçı Başvurusu Hakkında</option>
-                            <option value="Hata Bildirimi">🐛 Teknik Hata Bildirimi</option>
+                            <option value="Bilet İşlemleri">🎟️ Bilet İşlemleri</option>
+                            <option value="Hata Bildirimi">🐛 Teknik Hata</option>
                             <option value="Diğer">📝 Diğer</option>
                         </select>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="color: #ccc; display: block; margin-bottom: 5px;">Mesajınız:</label>
-                        <textarea name="message" required placeholder="Sorununuzu detaylıca açıklayın..." style="width: 100%; padding: 10px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 8px; height: 100px;"></textarea>
-                    </div>
-                    <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 25px; border-radius: 20px; font-weight: bold; cursor: pointer;">Talebi Gönder</button>
-                </form>
+                        <textarea name="message" required placeholder="Mesajınız..." style="width: 100%; padding: 10px; background: #2c2c2c; color: white; border: 1px solid #444; border-radius: 8px; height: 80px; margin-bottom: 10px;"></textarea>
+                        <button type="submit" style="background: #3498db; color: white; border: none; padding: 10px 20px; border-radius: 20px; font-weight: bold; cursor: pointer;">Talebi Gönder</button>
+                    </form>
+                </div>
             </section>
 
         </div>

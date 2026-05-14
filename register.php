@@ -5,13 +5,14 @@ include 'baglanti.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $full_name = mysqli_real_escape_string($baglan, $_POST['full_name']);
     $email = mysqli_real_escape_string($baglan, $_POST['email']);
+    $phone = mysqli_real_escape_string($baglan, $_POST['phone']); // Telefonu alıyoruz
     
     // Şifreyi güvenli hale getiriyoruz
     $password_raw = $_POST['password'];
     $hashed_password = password_hash($password_raw, PASSWORD_DEFAULT);
 
-    // BURASI KRİTİK: Sütun adını senin tablondaki gibi 'password_hash' yaptık
-    $sql = "INSERT INTO users (full_name, email, password_hash, role) VALUES ('$full_name', '$email', '$hashed_password', 'customer')";
+    // INSERT sorgusuna 'phone' sütununu ekledik
+    $sql = "INSERT INTO users (full_name, email, phone, password_hash, role) VALUES ('$full_name', '$email', '$phone', '$hashed_password', 'customer')";
     
     if (mysqli_query($baglan, $sql)) {
         header("Location: login.php?kayit=basarili");
@@ -29,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <title>Kayıt Ol - KTÜ Sanat Galerisi</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #121212; margin: 0;">
+<body style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #121212; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
 
     <div class="auth-card" style="background: #1e1e1e; padding: 40px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 400px; border: 1px solid #333;">
         <h2 style="color: #f1c40f; text-align: center; margin-bottom: 30px;">Kayıt Ol</h2>
@@ -49,6 +50,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div style="margin-bottom: 20px;">
                 <label style="color: #ccc; display: block; margin-bottom: 8px;">E-posta</label>
                 <input type="email" name="email" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2c2c2c; color: white; box-sizing: border-box; outline: none;">
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <label style="color: #ccc; display: block; margin-bottom: 8px;">Telefon Numarası</label>
+                <input type="text" name="phone" placeholder="05XX XXX XX XX" required style="width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #333; background: #2c2c2c; color: white; box-sizing: border-box; outline: none;">
             </div>
 
             <div style="margin-bottom: 30px;">
