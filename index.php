@@ -72,7 +72,7 @@ $events = mysqli_query($baglan, "SELECT * FROM events LIMIT 5");
                             <strong><?php echo $event['title']; ?></strong> 
                             <span>📅 <?php echo date("d.m.Y", strtotime($event['event_date'])); ?></span>
                         </div>
-                        <a href="etkinlik_detay.php?id=<?php echo $event['id']; ?>" class="btn-rezervasyon">Rezervasyon Yap</a>
+                        <a href="events.php?book_id=<?php echo $event['id']; ?>" class="btn-rezervasyon">Rezervasyon Yap</a>
                     </li>
                 <?php endwhile; ?>
             </ul>
